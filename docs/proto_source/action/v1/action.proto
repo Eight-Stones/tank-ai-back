@@ -1,0 +1,118 @@
+syntax = "proto3";
+
+package action.v1;
+
+// ObjectType enum for types of game object.
+enum ObjectType {
+  UNDEFINED_OBJECT = 0;
+  TANK = 1;
+  BULLET = 2;
+}
+
+// ActionType enum for mark any action.
+enum ActionType {
+  UNDEFINED_ACTION = 0;              // 0b0
+  FAIL = 1;                          // 0b1
+  OK = 2;                            // 0b10
+  BAN = 4;                           // 0b100
+  OK_BORDER = 8;                     // 0b1000
+  FAIL_BORDER = 16;                  // 0b10000
+  OK_STEP = 32;                      // 0b100000
+  FAIL_STEP = 64;                    // 0b1000000
+  OK_ROTATE = 128;                   // 0b10000000
+  FAIL_ROTATE = 256;                 // 0b100000000
+  OK_COLLISION = 512;                // 0b1000000000
+  NO_COLLISION = 1024;               // 0b10000000000
+  NOT_INTERRUPT_OK_COLLISION = 8192; // 0b1000000000000
+  DAMAGED = 16384;                   // 0b10000000000000
+  BOTH_DAMAGED = 32768;              // 0b100000000000000
+  OK_SHOT = 65536;                   // 0b10000000000000000
+  FAIL_SHOT = 131072;                // 0b100000000000000000
+  DISAPPEAR = 262144;                // 0b1000000000000000000
+  FOUND = 524288;                    // 0b10000000000000000000
+  NOT_FOUND = 1048576;               // 0b100000000000000000000
+}
+
+// RotateReq describe how player can rotate his object.
+message RotateReq{
+  string id = 1; // gamer id.
+  uint32 direction = 2; // direction up/down/left/right.
+}
+
+// RotateResp describe result of rotation.
+message RotateResp{
+  ActionType code = 1; // result info about rotate.
+}
+
+// MoveReq describe how player can move his object.
+message MoveReq{
+  string id = 1; // gamer id.
+}
+
+// MoveResp describe result of moving.
+message MoveResp{
+  ActionType code = 1; // result info about move.
+}
+
+// ShootReq describe how player can shoot by his object.
+message ShootReq{
+  string id = 1; // gamer id.
+}
+
+// ShootResp describe result of shooting.
+message ShootResp{
+  ActionType code = 1; // result info about shoot.
+}
+
+// Cell describe cell of field.
+message Cell{
+  int64 x = 1;
+  int64 y = 2;
+  ObjectType type = 3;
+}
+
+// Line describe line of cells.
+message Line{
+  repeated Cell cells = 1;
+}
+
+// View describe line of lines.
+message View {
+  repeated Line lines = 1;
+}
+
+// VisionReq describe how player can vision by his object.
+message VisionReq{
+  string id = 1; // gamer id.
+}
+
+// VisionResp describe result of vision.
+message VisionResp{
+  ActionType code = 1; // result info about vision.
+  View view = 2 ;
+}
+
+// RadarReq describe how player can radar by his object.
+message RadarReq{
+  string id = 1; // gamer id.
+}
+
+// VisionResp describe result of radar.
+message RadarResp{
+  ActionType code = 1; // result info about radar.
+  View view = 2 ;
+}
+
+// ActionService describe how player can play.
+service ActionService{
+  // Rotate tries to rotate player's object.
+  rpc Rotate(RotateReq) returns (RotateResp) {}
+  // Move tries to move player's object.
+  rpc Move(MoveReq) returns (MoveResp) {}
+  // Shoot tries to shoot by player's object.
+  rpc Shoot(ShootReq) returns (ShootResp) {}
+  // Vision tries to vision by player's object.
+  rpc Vision(VisionReq) returns (VisionResp) {}
+  // Radar tries to radar by player's object.
+  rpc Radar(RadarReq) returns (RadarResp) {}
+}

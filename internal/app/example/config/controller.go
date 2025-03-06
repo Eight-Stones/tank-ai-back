@@ -5,28 +5,43 @@ import (
 )
 
 const (
-	defaultHost = "localhost"
-	defaultPort = 8080
+	defaultHost     = "localhost"
+	defaultRestPort = 8080
+	defaultGrpcPort = 50051
 )
 
 type Controller struct {
-	RestBook RestBook
+	RestTank Rest
+	GrpcTank Grpc
 }
 
-type RestBook struct {
+type Rest struct {
+	Host string
+	Port int
+}
+
+type Grpc struct {
 	Host string
 	Port int
 }
 
 func newController(cfg config.Config) Controller {
 	return Controller{
-		RestBook: newRestBook(cfg),
+		RestTank: newTankBook(cfg),
+		GrpcTank: newGrpcBook(cfg),
 	}
 }
 
-func newRestBook(cfg config.Config) RestBook {
-	return RestBook{
+func newTankBook(cfg config.Config) Rest {
+	return Rest{
 		Host: cfg.Get("controller", "rest", "host").String(defaultHost),
-		Port: cfg.Get("controller", "rest", "port").Int(defaultPort),
+		Port: cfg.Get("controller", "rest", "port").Int(defaultRestPort),
+	}
+}
+
+func newGrpcBook(cfg config.Config) Grpc {
+	return Grpc{
+		Host: cfg.Get("controller", "grpc", "host").String(defaultHost),
+		Port: cfg.Get("controller", "grpc", "port").Int(defaultGrpcPort),
 	}
 }

@@ -6,13 +6,16 @@ logger.keys.inst = "local"
 controller.rest.host = "localhost"
 controller.rest.port = 8080
 
-db.postgres.book.host = "localhost"
-db.postgres.book.port = 5432
-db.postgres.book.name = "postgres"
-db.postgres.book.user = "postgres"
-db.postgres.book.password = "password"
-db.postgres.book.ssl = "disable"
-db.postgres.book.connMaxLifetime = "180s"
-db.postgres.book.maxOpenConns = 10
-db.postgres.book.connMaxIdleTime = "240s"
-db.postgres.book.maxIdleConns = 5
+controller.grpc.host = "localhost"
+controller.grpc.port = 50051
+
+db.postgres.tank.host = "localhost"
+db.postgres.tank.port = 5432
+db.postgres.tank.name = "postgres"
+db.postgres.tank.user = "postgres"
+db.postgres.tank.password = "password"
+db.postgres.tank.ssl = "disable"
+db.postgres.tank.connMaxLifetime = "180s"
+db.postgres.tank.maxOpenConns = 10
+db.postgres.tank.connMaxIdleTime = "240s"
+db.postgres.tank.maxIdleConns = 5

@@ -1,14 +1,16 @@
 module go-micro-service-template
 
-go 1.23
+go 1.23.1
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/go-micro/plugins/v4/config/encoder/toml v1.2.0
 	github.com/go-micro/plugins/v4/logger/zap v1.2.1
+	github.com/go-micro/plugins/v4/server/grpc v1.2.0
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.2
 	github.com/lib/pq v1.10.9
+	github.com/pressly/goose/v3 v3.24.1
 	github.com/prometheus/client_golang v1.20.5
 	github.com/qiangxue/fasthttp-routing v0.0.0-20160225050629-6ccdc2a18d87
 	github.com/stretchr/testify v1.10.0
@@ -16,6 +18,7 @@ require (
 	go-micro.dev/v4 v4.11.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/exp v0.0.0-20250106191152-7588d65b2ba8
+	google.golang.org/protobuf v1.36.2
 )
 
 require (
@@ -31,13 +34,20 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emirpasic/gods v1.12.0 // indirect
+	github.com/evanphx/json-patch/v5 v5.5.0 // indirect
+	github.com/felixge/httpsnoop v1.0.1 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
+	github.com/go-acme/lego/v4 v4.4.0 // indirect
 	github.com/go-git/gcfg v1.5.0 // indirect
 	github.com/go-git/go-billy/v5 v5.3.1 // indirect
 	github.com/go-git/go-git/v5 v5.4.2 // indirect
 	github.com/go-ozzo/ozzo-routing v2.1.4+incompatible // indirect
+	github.com/gobwas/httphead v0.1.0 // indirect
+	github.com/gobwas/pool v0.2.1 // indirect
+	github.com/gobwas/ws v1.0.4 // indirect
 	github.com/golang/gddo v0.0.0-20210115222349-20d68f94ee1f // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
+	github.com/gorilla/handlers v1.5.1 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
@@ -56,7 +66,6 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/pressly/goose/v3 v3.24.1 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.55.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
@@ -76,7 +85,8 @@ require (
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/tools v0.29.0 // indirect
-	google.golang.org/protobuf v1.36.2 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240318140521-94a12d6c2237 // indirect
+	google.golang.org/grpc v1.62.1 // indirect
 	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

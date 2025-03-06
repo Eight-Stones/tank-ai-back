@@ -1,17 +1,16 @@
-package rest
+package grpc
 
 import (
 	"strconv"
 
+	gsrv "github.com/go-micro/plugins/v4/server/grpc"
 	"go-micro.dev/v4"
-	"go-micro.dev/v4/codec/json"
 	"go-micro.dev/v4/server"
 
 	"go-micro-service-template/common"
 	commonmocks "go-micro-service-template/common/common_mocks"
-	"go-micro-service-template/internal/controller/rest/handler/probe"
-	"go-micro-service-template/internal/controller/rest/middleware"
-	"go-micro-service-template/pkg/micro/fastm"
+	"go-micro-service-template/internal/controller/grpc/handler/probe"
+	er "go-micro-service-template/pkg/error"
 )
 
 type Option func(*options)
@@ -20,15 +19,17 @@ type Option func(*options)
 var defaultOptions = options{
 	host:     defaultHost,
 	port:     defaultPort,
-	handlers: []any{new(probe.Probes)},
+	handlers: []Registrar{new(probe.Probe).Register},
 	log:      &commonmocks.MockLogger{},
 }
+
+type Registrar func(server.Server) error
 
 type options struct {
 	name     string
 	host     string
 	port     int
-	handlers []any
+	handlers []Registrar
 	log      common.LoggerI
 }
 
@@ -38,7 +39,7 @@ func WithName(name string) Option {
 	}
 }
 
-func WithHandler(handler any) Option {
+func WithHandler(handler Registrar) Option {
 	return func(o *options) {
 		o.handlers = append(o.handlers, handler)
 	}
@@ -67,37 +68,30 @@ type Controller struct {
 	opts    options
 }
 
-func New(opt ...Option) *Controller {
+func New(opt ...Option) (*Controller, error) {
 	cfg := defaultOptions
 	for _, o := range opt {
 		o(&cfg)
 	}
 
-	opts := []micro.Option{
+	service := micro.NewService(
 		micro.Name(cfg.name),
 		micro.Server(
-			fastm.NewServer(
-				server.Codec("application/json", json.NewCodec),
-				server.WrapHandler(middleware.ResolverWrapper),
-				server.WrapHandler(middleware.PanicWrapper),
-				server.WrapHandler(fastm.LogWrapper),
-				server.WrapHandler(fastm.RequestIDAcquirer),
-			),
+			gsrv.NewServer(),
 		),
-		micro.Address(cfg.host + ":" + strconv.Itoa(cfg.port)),
-	}
-
-	for _, h := range cfg.handlers {
-		opts = append(opts, micro.Handle(h))
-	}
-
-	// Create a new service
-	service := micro.NewService(
-		opts...,
+		micro.Address(cfg.host+":"+strconv.Itoa(cfg.port)),
 	)
+
+	service.Init()
+
+	for _, r := range cfg.handlers {
+		if err := r(service.Server()); err != nil {
+			return nil, er.Wrap(err, "error during register handlers")
+		}
+	}
 
 	return &Controller{
 		service: service,
 		opts:    cfg,
-	}
+	}, nil
 }

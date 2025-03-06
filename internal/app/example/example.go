@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"go-micro-service-template/internal/app/example/config"
+	"go-micro-service-template/internal/controller/grpc"
 	"go-micro-service-template/internal/controller/rest"
 	restexample "go-micro-service-template/internal/controller/rest/handler/example"
 	"go-micro-service-template/internal/controller/rest/handler/probe"
@@ -84,24 +85,45 @@ func Run(configPath string) error {
 	exampleHandler := restexample.New(exampleLogic)
 
 	// --------------------------------------------
-	// ----------------api server------------------
+	// ----------------rest server-----------------
 	// --------------------------------------------
 
 	rc := rest.New(
-		rest.WithHost(cfg.Controller.RestBook.Host),
-		rest.WithPort(cfg.Controller.RestBook.Port),
+		rest.WithName("tank-ai-rest"),
+		rest.WithHost(cfg.Controller.RestTank.Host),
+		rest.WithPort(cfg.Controller.RestTank.Port),
 		rest.WithLogger(loggerm.Sugar(l)),
 		rest.WithHandler(probeHandler),
 		rest.WithHandler(exampleHandler),
 	)
 
 	// --------------------------------------------
+	// ----------------grpc server-----------------
+	// --------------------------------------------
+
+	gs, err := grpc.New(
+		grpc.WithName("tank-ai-grpc"),
+		grpc.WithHost(cfg.Controller.GrpcTank.Host),
+		grpc.WithPort(cfg.Controller.GrpcTank.Port),
+		grpc.WithLogger(loggerm.Sugar(l)),
+	)
+	if err != nil {
+		return er.Wrap(err, "failed to initialize grpc server")
+	}
+
+	// --------------------------------------------
 	// -------------start http server--------------
 	// --------------------------------------------
 
-	if err = rc.Run(); err != nil {
-		return er.Wrap(err, "failed to run")
-	}
+	rc.Start()
+
+	// --------------------------------------------
+	// -------------start grpc server--------------
+	// --------------------------------------------
+
+	gs.Start()
+
+	<-ctx.Done()
 
 	return nil
 }

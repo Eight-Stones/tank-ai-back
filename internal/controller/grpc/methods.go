@@ -1,4 +1,4 @@
-package rest
+package grpc
 
 import (
 	"errors"
@@ -41,9 +41,9 @@ func (c Controller) String() string {
 
 func (c Controller) Start() {
 	go func() {
-		c.opts.log.Infof("rest server '%v' started on '%v:%d'", c.opts.name, c.opts.host, c.opts.port)
+		c.opts.log.Infof("grpc server '%v' started on '%v:%d'", c.opts.name, c.opts.host, c.opts.port)
 		if err := c.Run(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			c.opts.log.Errorf("error during run rest: %v", err)
+			c.opts.log.Errorf("error during run grpc: %v", err)
 			return
 		}
 		c.opts.log.Infof("rest server '%v' stopped", c.opts.name)
