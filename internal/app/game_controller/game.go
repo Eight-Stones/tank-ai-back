@@ -1,4 +1,4 @@
-package example
+package game_controller
 
 import (
 	"context"
@@ -6,14 +6,12 @@ import (
 	"os/signal"
 	"syscall"
 
-	"go-micro-service-template/internal/app/example/config"
+	"go-micro-service-template/internal/app/game_controller/config"
 	"go-micro-service-template/internal/controller/grpc"
 	"go-micro-service-template/internal/controller/rest"
-	restexample "go-micro-service-template/internal/controller/rest/handler/example"
+	restgame "go-micro-service-template/internal/controller/rest/handler/game"
 	"go-micro-service-template/internal/controller/rest/handler/probe"
-	gwexample "go-micro-service-template/internal/gateway/storage/postgres/example"
-	logicexample "go-micro-service-template/internal/usecase/example"
-	trs "go-micro-service-template/pkg/database/transactioner"
+	"go-micro-service-template/internal/usecase/game"
 	er "go-micro-service-template/pkg/error"
 	"go-micro-service-template/pkg/micro/loggerm"
 )
@@ -47,42 +45,22 @@ func Run(configPath string) error {
 	// -------------------db poll------------------
 	// --------------------------------------------
 
-	pool := trs.New(
-		trs.WithLogger(l),
-		trs.WithHost(cfg.Storage.Book.Host),
-		trs.WithPort(cfg.Storage.Book.Port),
-		trs.WithDBName(cfg.Storage.Book.DBName),
-		trs.WithUsername(cfg.Storage.Book.Username),
-		trs.WithPassword(cfg.Storage.Book.Password),
-		trs.WithMaxOpenConns(int32(cfg.Storage.Book.MaxOpenConns)),
-		trs.WithSSLMode(cfg.Storage.Book.SSLMode),
-	)
-
-	if err = pool.Connect(ctx); err != nil {
-		return er.Wrap(err, "failed to initialize database pool")
-	}
-
 	// --------------------------------------------
 	// -------------------gateway------------------
 	// --------------------------------------------
-
-	exampleGateway := gwexample.New()
 
 	// --------------------------------------------
 	// -------------------logic--------------------
 	// --------------------------------------------
 
-	exampleLogic := logicexample.New(
-		logicexample.WithTxProvider(pool),
-		logicexample.WithExampleGW(exampleGateway),
-	)
+	node := game.NewNode(l)
 
 	// --------------------------------------------
 	// -----------------handler--------------------
 	// --------------------------------------------
 
 	probeHandler := probe.New()
-	exampleHandler := restexample.New(exampleLogic)
+	gameHandler := restgame.New(node)
 
 	// --------------------------------------------
 	// ----------------rest server-----------------
@@ -94,7 +72,7 @@ func Run(configPath string) error {
 		rest.WithPort(cfg.Controller.RestTank.Port),
 		rest.WithLogger(loggerm.Sugar(l)),
 		rest.WithHandler(probeHandler),
-		rest.WithHandler(exampleHandler),
+		rest.WithHandler(gameHandler),
 	)
 
 	// --------------------------------------------

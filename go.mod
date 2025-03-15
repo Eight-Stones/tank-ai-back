@@ -3,6 +3,7 @@ module go-micro-service-template
 go 1.23.1
 
 require (
+	github.com/Eight-Stones/ecs-tank-engine/v2 v2.0.6
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/go-micro/plugins/v4/config/encoder/toml v1.2.0
 	github.com/go-micro/plugins/v4/logger/zap v1.2.1

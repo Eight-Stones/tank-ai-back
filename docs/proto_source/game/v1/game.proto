@@ -2,6 +2,11 @@ syntax = "proto3";
 
 package game.v1;
 
+message Position{
+  int32 x = 1;
+  int32 y = 2;
+}
+
 // Game describe `game` object.
 message Game{
   string id = 1; // uniq identifier of game.
@@ -24,7 +29,7 @@ message JoinReq{
 
 // JoinResp describe metadata of joined game.
 message JoinResp{
-  string user_id = 1; // id for player to rule his machine.
+  string player_id = 1; // id for player to rule his machine.
 }
 
 // ReadyReq ping from player that he is ready.
@@ -35,7 +40,9 @@ message ReadyReq{
 
 // ReadyResp return time in unix seconds when back stars the game.
 message ReadyResp{
-  uint64 start_time_utc = 1;
+  bool  is_started = 1;
+  uint64 start_time_utc = 2;
+  Position Position = 3;
 }
 
 // GameService describe how player can join to game.
