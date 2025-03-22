@@ -3,6 +3,7 @@ package game
 import (
 	"context"
 	"fmt"
+	"time"
 
 	commonL "go-micro.dev/v4/logger"
 
@@ -47,7 +48,8 @@ func (n *Node) Game(id string) (*entity.Game, error) {
 
 	return &entity.Game{
 		ID:     g.id,
-		Status: g.status.String(),
+		Start:  g.start,
+		Status: g.status,
 		Player: players,
 	}, nil
 }
@@ -57,7 +59,7 @@ func (n *Node) Games() []*entity.Game {
 	for _, game := range n.games {
 		out = append(out, &entity.Game{
 			ID:     game.id,
-			Status: game.status.String(),
+			Status: game.status,
 			Player: game.Players(),
 		})
 	}
@@ -71,18 +73,20 @@ func (n *Node) CreateGame() string {
 	return game.ID()
 }
 
-func (n *Node) StartGame(ctx context.Context, id string) {
+func (n *Node) StartGame(ctx context.Context, id string) time.Time {
 	g, ok := n.games[id]
 	if !ok {
-		return
+		return time.Time{}
 	}
-	g.Start(context.Background())
+	start := g.Start(context.Background())
 
 	if bots := n.bots[id]; len(bots) > 0 {
 		for _, b := range bots {
 			b.Run(ctx)
 		}
 	}
+
+	return start
 }
 
 func (n *Node) StopGame(id string) {
@@ -96,6 +100,15 @@ func (n *Node) StopGame(id string) {
 	}
 
 	g.Stop()
+}
+
+func (n *Node) StartTime(id string) (bool, time.Time) {
+	g, ok := n.games[id]
+	if !ok {
+		return false, time.Time{}
+	}
+
+	return g.StartTime()
 }
 
 func (n *Node) AddPlayer(id, alias string) (string, error) {
@@ -136,7 +149,7 @@ func (n *Node) AddBot(id string) (string, error) {
 	return playerID, nil
 }
 
-func (n *Node) View(id string) [][]entity.Cell {
+func (n *Node) Field(id string) [][]entity.Cell {
 	g, ok := n.games[id]
 	if !ok {
 		return [][]entity.Cell{}

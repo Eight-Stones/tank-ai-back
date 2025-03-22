@@ -1,5 +1,9 @@
 package dto
 
+import (
+	"time"
+)
+
 type Player struct {
 	ID        string `json:"id"`
 	Name      string `json:"name,omitempty"`
@@ -71,4 +75,6 @@ type PutRunGameRequest struct {
 	Action string `json:"action,omitempty"`
 }
 
-type PutRunGameResponse struct{}
+type PutRunGameResponse struct {
+	Start time.Time `json:"start,omitempty"`
+}

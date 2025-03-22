@@ -29,7 +29,7 @@ func PlayersToDTO(in []*entity.Player) []*dto.Player {
 func GameToDTO(in *entity.Game) *dto.Game {
 	return &dto.Game{
 		ID:      in.ID,
-		Status:  in.Status,
+		Status:  in.Status.String(),
 		Players: PlayersToDTO(in.Player),
 	}
 }

@@ -36,6 +36,8 @@ func NewActionServiceEndpoints() []*api.Endpoint {
 // Client API for ActionService service
 
 type ActionService interface {
+	// Info return info about player
+	Info(ctx context.Context, in *InfoReq, opts ...client.CallOption) (*InfoResp, error)
 	// Rotate tries to rotate player's object.
 	Rotate(ctx context.Context, in *RotateReq, opts ...client.CallOption) (*RotateResp, error)
 	// Move tries to move player's object.
@@ -58,6 +60,16 @@ func NewActionService(name string, c client.Client) ActionService {
 		c:    c,
 		name: name,
 	}
+}
+
+func (c *actionService) Info(ctx context.Context, in *InfoReq, opts ...client.CallOption) (*InfoResp, error) {
+	req := c.c.NewRequest(c.name, "ActionService.Info", in)
+	out := new(InfoResp)
+	err := c.c.Call(ctx, req, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *actionService) Rotate(ctx context.Context, in *RotateReq, opts ...client.CallOption) (*RotateResp, error) {
@@ -113,6 +125,8 @@ func (c *actionService) Radar(ctx context.Context, in *RadarReq, opts ...client.
 // Server API for ActionService service
 
 type ActionServiceHandler interface {
+	// Info return info about player
+	Info(context.Context, *InfoReq, *InfoResp) error
 	// Rotate tries to rotate player's object.
 	Rotate(context.Context, *RotateReq, *RotateResp) error
 	// Move tries to move player's object.
@@ -127,6 +141,7 @@ type ActionServiceHandler interface {
 
 func RegisterActionServiceHandler(s server.Server, hdlr ActionServiceHandler, opts ...server.HandlerOption) error {
 	type actionService interface {
+		Info(ctx context.Context, in *InfoReq, out *InfoResp) error
 		Rotate(ctx context.Context, in *RotateReq, out *RotateResp) error
 		Move(ctx context.Context, in *MoveReq, out *MoveResp) error
 		Shoot(ctx context.Context, in *ShootReq, out *ShootResp) error
@@ -142,6 +157,10 @@ func RegisterActionServiceHandler(s server.Server, hdlr ActionServiceHandler, op
 
 type actionServiceHandler struct {
 	ActionServiceHandler
+}
+
+func (h *actionServiceHandler) Info(ctx context.Context, in *InfoReq, out *InfoResp) error {
+	return h.ActionServiceHandler.Info(ctx, in, out)
 }
 
 func (h *actionServiceHandler) Rotate(ctx context.Context, in *RotateReq, out *RotateResp) error {

@@ -13,36 +13,17 @@ import (
 	"go-micro-service-template/entity"
 )
 
-type GameStatus uint
-
-func (s GameStatus) String() string {
-	switch s {
-	case CreateGameStatus:
-		return "Created"
-	case ProcessGameStatus:
-		return "Processing"
-	case EndGameStatus:
-		return "Ended"
-	}
-	return "Unknown"
-}
-
-const (
-	CreateGameStatus GameStatus = iota
-	ProcessGameStatus
-	EndGameStatus
-)
-
 type Game struct {
 	id     string
-	status GameStatus
+	status entity.GameStatus
+	start  time.Time
 	engine *engine.Field
 }
 
 func NewGame() *Game {
 	return &Game{
 		id:     uuid.New().String(),
-		status: CreateGameStatus,
+		status: entity.CreateGameStatus,
 		engine: engine.New(config.WithTankVision(7), config.WithTankRadar(12), config.WithJobsAutoMoverDuration(time.Millisecond*100)),
 	}
 }
@@ -51,18 +32,30 @@ func (g *Game) ID() string {
 	return g.id
 }
 
-func (g *Game) Status() GameStatus {
+func (g *Game) Status() entity.GameStatus {
 	return g.status
 }
 
-func (g *Game) Start(ctx context.Context) {
-	g.engine.Start(ctx)
-	g.status = ProcessGameStatus
+func (g *Game) Start(ctx context.Context) time.Time {
+	go func() {
+		g.start = time.Now().Add(time.Second * 3)
+		g.status = entity.ProcessGameStatus
+		time.Sleep(time.Second * 2)
+		g.engine.Start(ctx)
+	}()
+	return g.start
 }
 
 func (g *Game) Stop() {
 	g.engine.Stop()
-	g.status = EndGameStatus
+	g.status = entity.EndGameStatus
+}
+
+func (g *Game) StartTime() (bool, time.Time) {
+	if g.status == entity.ProcessGameStatus {
+		return true, g.start
+	}
+	return false, time.Time{}
 }
 
 func (g *Game) AddTank() (string, error) {

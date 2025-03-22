@@ -25,6 +25,7 @@ message GamesResp{
 // JoinReq describe how player can join to selected game.
 message JoinReq{
   string game_id = 1; // its secret id for gamer, using for control object.
+  string alias = 2; // its name of player.
 }
 
 // JoinResp describe metadata of joined game.
@@ -41,8 +42,7 @@ message ReadyReq{
 // ReadyResp return time in unix seconds when back stars the game.
 message ReadyResp{
   bool  is_started = 1;
-  uint64 start_time_utc = 2;
-  Position Position = 3;
+  int64 start_time_utc = 2;
 }
 
 // GameService describe how player can join to game.

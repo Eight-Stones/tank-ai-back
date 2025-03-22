@@ -49,6 +49,7 @@ func (sb *SimpleBot) Run(ctx context.Context) {
 	sb.cancel = cancel
 
 	go func() {
+		time.Sleep(time.Second * 4) // время старта перед началом игры
 		for {
 			select {
 			case <-ctx.Done():

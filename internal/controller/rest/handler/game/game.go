@@ -2,6 +2,7 @@ package game
 
 import (
 	"context"
+	"time"
 
 	"go-micro-service-template/entity"
 	"go-micro-service-template/internal/controller/rest/convert"
@@ -11,13 +12,15 @@ import (
 
 type Noder interface {
 	CreateGame() string
-	StartGame(ctx context.Context, id string)
+	StartGame(ctx context.Context, id string) time.Time
 	StopGame(id string)
+
+	StartTime(id string) (bool, time.Time)
 
 	Game(id string) (*entity.Game, error)
 	Games() []*entity.Game
 	AddBot(id string) (string, error)
-	View(id string) [][]entity.Cell
+	Field(id string) [][]entity.Cell
 }
 
 // Node ...
@@ -63,7 +66,7 @@ func (n *Node) GetGameViewParamId(
 	req *dto.GetNodeViewRequest,
 	resp *dto.GetNodeViewResponse,
 ) error {
-	view := n.noder.View(req.ID)
+	view := n.noder.Field(req.ID)
 	if view == nil {
 		return nil // todo
 	}
@@ -86,10 +89,10 @@ func (n *Node) PostGame(
 func (n *Node) PutGameParamId(
 	ctx context.Context,
 	req *dto.PutRunGameRequest,
-	_ *dto.PutRunGameResponse,
+	resp *dto.PutRunGameResponse,
 ) error {
 	if req.Action == "run" {
-		n.noder.StartGame(ctx, req.ID)
+		resp.Start = n.noder.StartGame(ctx, req.ID)
 	}
 
 	if req.Action == "stop" {

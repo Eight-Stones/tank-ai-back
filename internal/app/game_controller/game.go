@@ -8,6 +8,7 @@ import (
 
 	"go-micro-service-template/internal/app/game_controller/config"
 	"go-micro-service-template/internal/controller/grpc"
+	grpcgame "go-micro-service-template/internal/controller/grpc/handler/game"
 	"go-micro-service-template/internal/controller/rest"
 	restgame "go-micro-service-template/internal/controller/rest/handler/game"
 	"go-micro-service-template/internal/controller/rest/handler/probe"
@@ -56,11 +57,17 @@ func Run(configPath string) error {
 	node := game.NewNode(l)
 
 	// --------------------------------------------
-	// -----------------handler--------------------
+	// ------------rest handler--------------------
 	// --------------------------------------------
 
 	probeHandler := probe.New()
-	gameHandler := restgame.New(node)
+	gameRestHandler := restgame.New(node)
+
+	// --------------------------------------------
+	// ------------grpc handler--------------------
+	// --------------------------------------------
+
+	gameGRPCHandler := grpcgame.New(node)
 
 	// --------------------------------------------
 	// ----------------rest server-----------------
@@ -72,7 +79,7 @@ func Run(configPath string) error {
 		rest.WithPort(cfg.Controller.RestTank.Port),
 		rest.WithLogger(loggerm.Sugar(l)),
 		rest.WithHandler(probeHandler),
-		rest.WithHandler(gameHandler),
+		rest.WithHandler(gameRestHandler),
 	)
 
 	// --------------------------------------------
@@ -83,6 +90,7 @@ func Run(configPath string) error {
 		grpc.WithName("tank-ai-grpc"),
 		grpc.WithHost(cfg.Controller.GrpcTank.Host),
 		grpc.WithPort(cfg.Controller.GrpcTank.Port),
+		grpc.WithHandler(gameGRPCHandler.Register),
 		grpc.WithLogger(loggerm.Sugar(l)),
 	)
 	if err != nil {
