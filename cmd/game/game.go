@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"go-micro-service-template/internal/app/example"
+	"go-micro-service-template/internal/app/game_controller"
 )
 
 var (
@@ -23,7 +23,7 @@ func main() {
 		return
 	}
 
-	if err := example.Run(configFile); err != nil {
+	if err := game_controller.Run(configFile); err != nil {
 		panic(err)
 	}
 }

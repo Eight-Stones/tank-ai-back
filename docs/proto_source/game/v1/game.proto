@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package game.v1;
+
+message Position{
+  int32 x = 1;
+  int32 y = 2;
+}
+
+// Game describe `game` object.
+message Game{
+  string id = 1; // uniq identifier of game.
+}
+
+// GamesReq describe how get all games, optional can included ended.
+message GamesReq{
+  optional bool ended = 1; // if need ended games
+}
+
+// GamesResp contains
+message GamesResp{
+  repeated Game games = 1; // list of all
+}
+
+// JoinReq describe how player can join to selected game.
+message JoinReq{
+  string game_id = 1; // its secret id for gamer, using for control object.
+  string alias = 2; // its name of player.
+}
+
+// JoinResp describe metadata of joined game.
+message JoinResp{
+  string player_id = 1; // id for player to rule his machine.
+}
+
+// ReadyReq ping from player that he is ready.
+message ReadyReq{
+  string game_id = 1; // selected game id.
+  string user_id = 2; // player id from selected game id.
+}
+
+// ReadyResp return time in unix seconds when back stars the game.
+message ReadyResp{
+  bool  is_started = 1;
+  int64 start_time_utc = 2;
+}
+
+// GameService describe how player can join to game.
+service GameService{
+  // Games returns all games to join.
+  rpc Games(GamesReq) returns (GamesResp) {}
+  // Join tries to select game by ID.
+  rpc Join(JoinReq) returns (JoinResp) {}
+  // Ready returns info when game prepare to start or start.
+  rpc Ready(ReadyReq) returns (ReadyResp) {}
+}

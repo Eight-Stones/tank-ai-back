@@ -1,4 +1,4 @@
-package example
+package game_controller
 
 import (
 	"context"
@@ -6,13 +6,14 @@ import (
 	"os/signal"
 	"syscall"
 
-	"go-micro-service-template/internal/app/example/config"
+	"go-micro-service-template/internal/app/game_controller/config"
+	"go-micro-service-template/internal/controller/grpc"
+	grpcaction "go-micro-service-template/internal/controller/grpc/handler/action"
+	grpcgame "go-micro-service-template/internal/controller/grpc/handler/game"
 	"go-micro-service-template/internal/controller/rest"
-	restexample "go-micro-service-template/internal/controller/rest/handler/example"
+	restgame "go-micro-service-template/internal/controller/rest/handler/game"
 	"go-micro-service-template/internal/controller/rest/handler/probe"
-	gwexample "go-micro-service-template/internal/gateway/storage/postgres/example"
-	logicexample "go-micro-service-template/internal/usecase/example"
-	trs "go-micro-service-template/pkg/database/transactioner"
+	"go-micro-service-template/internal/usecase/game"
 	er "go-micro-service-template/pkg/error"
 	"go-micro-service-template/pkg/micro/loggerm"
 )
@@ -46,62 +47,72 @@ func Run(configPath string) error {
 	// -------------------db poll------------------
 	// --------------------------------------------
 
-	pool := trs.New(
-		trs.WithLogger(l),
-		trs.WithHost(cfg.Storage.Book.Host),
-		trs.WithPort(cfg.Storage.Book.Port),
-		trs.WithDBName(cfg.Storage.Book.DBName),
-		trs.WithUsername(cfg.Storage.Book.Username),
-		trs.WithPassword(cfg.Storage.Book.Password),
-		trs.WithMaxOpenConns(int32(cfg.Storage.Book.MaxOpenConns)),
-		trs.WithSSLMode(cfg.Storage.Book.SSLMode),
-	)
-
-	if err = pool.Connect(ctx); err != nil {
-		return er.Wrap(err, "failed to initialize database pool")
-	}
-
 	// --------------------------------------------
 	// -------------------gateway------------------
 	// --------------------------------------------
-
-	exampleGateway := gwexample.New()
 
 	// --------------------------------------------
 	// -------------------logic--------------------
 	// --------------------------------------------
 
-	exampleLogic := logicexample.New(
-		logicexample.WithTxProvider(pool),
-		logicexample.WithExampleGW(exampleGateway),
-	)
+	node := game.NewNode(l)
 
 	// --------------------------------------------
-	// -----------------handler--------------------
+	// ------------rest handler--------------------
 	// --------------------------------------------
 
 	probeHandler := probe.New()
-	exampleHandler := restexample.New(exampleLogic)
+	gameRestHandler := restgame.New(node)
 
 	// --------------------------------------------
-	// ----------------api server------------------
+	// ------------grpc handler--------------------
+	// --------------------------------------------
+
+	gameGRPCHandler := grpcgame.New(node)
+	actionGRPCHandler := grpcaction.New(node)
+
+	// --------------------------------------------
+	// ----------------rest server-----------------
 	// --------------------------------------------
 
 	rc := rest.New(
-		rest.WithHost(cfg.Controller.RestBook.Host),
-		rest.WithPort(cfg.Controller.RestBook.Port),
+		rest.WithName("tank-ai-rest"),
+		rest.WithHost(cfg.Controller.RestTank.Host),
+		rest.WithPort(cfg.Controller.RestTank.Port),
 		rest.WithLogger(loggerm.Sugar(l)),
 		rest.WithHandler(probeHandler),
-		rest.WithHandler(exampleHandler),
+		rest.WithHandler(gameRestHandler),
 	)
+
+	// --------------------------------------------
+	// ----------------grpc server-----------------
+	// --------------------------------------------
+
+	gs, err := grpc.New(
+		grpc.WithName("tank-ai-grpc"),
+		grpc.WithHost(cfg.Controller.GrpcTank.Host),
+		grpc.WithPort(cfg.Controller.GrpcTank.Port),
+		grpc.WithHandler(gameGRPCHandler.Register),
+		grpc.WithHandler(actionGRPCHandler.Register),
+		grpc.WithLogger(loggerm.Sugar(l)),
+	)
+	if err != nil {
+		return er.Wrap(err, "failed to initialize grpc server")
+	}
 
 	// --------------------------------------------
 	// -------------start http server--------------
 	// --------------------------------------------
 
-	if err = rc.Run(); err != nil {
-		return er.Wrap(err, "failed to run")
-	}
+	rc.Start()
+
+	// --------------------------------------------
+	// -------------start grpc server--------------
+	// --------------------------------------------
+
+	gs.Start()
+
+	<-ctx.Done()
 
 	return nil
 }
