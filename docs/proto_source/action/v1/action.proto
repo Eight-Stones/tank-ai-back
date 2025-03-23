@@ -66,6 +66,7 @@ message RotateResp{
 // MoveReq describe how player can move his object.
 message MoveReq{
   string id = 1; // gamer id.
+  uint32 direction = 2; // direction up/down/left/right.
 }
 
 // MoveResp describe result of moving.
@@ -90,16 +91,6 @@ message Cell{
   ObjectType type = 3;
 }
 
-// Line describe line of cells.
-message Line{
-  repeated Cell cells = 1;
-}
-
-// View describe line of lines.
-message View {
-  repeated Line lines = 1;
-}
-
 // VisionReq describe how player can vision by his object.
 message VisionReq{
   string id = 1; // gamer id.
@@ -108,7 +99,7 @@ message VisionReq{
 // VisionResp describe result of vision.
 message VisionResp{
   ActionType code = 1; // result info about vision.
-  View view = 2 ;
+  repeated Cell cells = 2;
 }
 
 // RadarReq describe how player can radar by his object.
@@ -119,7 +110,7 @@ message RadarReq{
 // VisionResp describe result of radar.
 message RadarResp{
   ActionType code = 1; // result info about radar.
-  View view = 2 ;
+  repeated Cell cells = 2;
 }
 
 // ActionService describe how player can play.

@@ -8,6 +8,7 @@ import (
 
 	"go-micro-service-template/internal/app/game_controller/config"
 	"go-micro-service-template/internal/controller/grpc"
+	grpcaction "go-micro-service-template/internal/controller/grpc/handler/action"
 	grpcgame "go-micro-service-template/internal/controller/grpc/handler/game"
 	"go-micro-service-template/internal/controller/rest"
 	restgame "go-micro-service-template/internal/controller/rest/handler/game"
@@ -68,6 +69,7 @@ func Run(configPath string) error {
 	// --------------------------------------------
 
 	gameGRPCHandler := grpcgame.New(node)
+	actionGRPCHandler := grpcaction.New(node)
 
 	// --------------------------------------------
 	// ----------------rest server-----------------
@@ -91,6 +93,7 @@ func Run(configPath string) error {
 		grpc.WithHost(cfg.Controller.GrpcTank.Host),
 		grpc.WithPort(cfg.Controller.GrpcTank.Port),
 		grpc.WithHandler(gameGRPCHandler.Register),
+		grpc.WithHandler(actionGRPCHandler.Register),
 		grpc.WithLogger(loggerm.Sugar(l)),
 	)
 	if err != nil {
