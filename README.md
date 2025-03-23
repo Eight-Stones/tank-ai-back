@@ -1,43 +1,27 @@
-# golang-service-template
-target on developing of simple golang web service
+# tank ai backend
+MVP для имплементации возможностей движка `github.com/Eight-Stones/ecs-tank-engine`
+## Disclaimer
+Код проекта жуткая солянка из `срезанных углов`, компромиссов и отсутствующей обработки ошибок, собран как демонстрация работы движка 
+и попытка попробовать его возможности, для дальнейшей модернизации, скорее всего линтер, архитектурный линтер и отсутствие тестов
+могут свести с ума, но именно MVP нужно для сбора обратной связи
+## Как запустить
+Команда запуска `go run cmd/game/game.go` 
+## Конфигурация 
+Файл с настройками по умолчанию расположен `config/config.toml`
+## API для работы с игрой
+Путь `docs/proto_source/game`.  
+Содержит следующие методы:
+- rpc Games(GamesReq) returns (GamesResp) {} - Отвечает за список игр, которые сейчас созданы
+- rpc Join(JoinReq) returns (JoinResp) {} - Отправляет запрос на присоединение
+- rpc Ready(ReadyReq) returns (ReadyResp) {} - Позволяет узнать запущена ли игра
+## API для игрока
+Путь `docs/proto_source/action`.  
+Содержит следующие методы
+- rpc Info(InfoReq) returns (InfoResp) {} - Возвращает данные по игроку, не имеет отката
+- rpc Rotate(RotateReq) returns (RotateResp) {} - Поворачивает танк в направлении
+- rpc Move(MoveReq) returns (MoveResp) {} - Двигает танк в направлении
+- rpc Shoot(ShootReq) returns (ShootResp) {} - Осуществляет выстрел в текущем направлении танка
+- rpc Vision(VisionReq) returns (VisionResp) {} - Запрашивает небольшой обзор вокруг игрока, не имеет отката
+- rpc Radar(RadarReq) returns (RadarResp) {} - Запрашивает большой обзор вокруг игрока
 
-## ability roadmap
-### layers
-- [x] app builder layer
-- [x] rest controller layer
-- [x] usecase layer
-- [x] gateway repo with pg example
-### infrastructure
-- [x] working docker-compose example app
-- [x] docker example for example app
-- [x] docker example for migrator app
-### database
-- [x] working node of local pg
-- [x] special object for building query aims
-- [x] simple transaction manager implementations
-- [x] example applying migrations by goose cmd 
-- [x] example applying migrations by migrator app
-### generator
-- [x] using go-buf for generating proto api
-### observability 
-- [x] working grafana
-- [x] golang system dashboard
-- [ ] service info dashboard
-- [ ] jaeger trace collector
-- [ ] loki logs collector
-- [ ] alert manager 
-### structure and package
-- [x] struct error package
-- [x] struct logger package (with go-micro adapt)
-- [x] fasthttp server package (with go-micro adapt, not mine package)
-- [x] config package by toml format (with go-micro adapt)
-### scripts
-- [x] sh scripts with dependencies
-### support
-- [x] Makefile
-- [x] Build commands
-- [x] `Golangci-lint` utility
-- [x] `Golang Arch-lint` utility
-- [x] `Golang Arch-lint` basic setup
-- [x] `Golang Arch-lint` graph setup 
-- [ ] `Golang Arch-lint` vendor fine tuning
+Каждый метод возвращает код, с толкованием можно ознакомится в `docs/proto_source/action`
